@@ -1,6 +1,6 @@
 {
   "name": "aws-ses-template-uploader",
-  "version": "1.0.2",
+  "version": "1.0.2-beta",
   "description": "",
   "main": "index.js",
   "scripts": {
