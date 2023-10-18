@@ -48,7 +48,7 @@ function parseFiles(client, templatesDir, prefix) {
         const file = JSON.parse(fs.readFileSync(path));
         core.notice(`file: ${JSON.stringify(file)}`);
 
-        const templateName = `${prefix}_${file.Template.TemplateName}`;
+        const templateName = `${prefix}${file.Template.TemplateName}`;
         core.notice(`templateName: ${templateName}`);
 
         // First, figure out if we have a template
