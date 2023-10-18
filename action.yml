@@ -1,0 +1,13 @@
+name: "AWS SES Templates Uploader"
+description: "Upload SES templates that reside in a folder in your repo"
+inputs:
+  templates:
+    description: "Folder location where all templates are present"
+    required: true
+    default: "templates"
+  prefix:
+    description: "Prefix to add while creating/updating templates"
+    required: false
+runs:
+  using: "node20"
+  main: "dist/index.js"
