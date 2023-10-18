@@ -11,9 +11,11 @@ async function run() {
     try {
         // Grab the templates directory location from the input
         const templatesDir = core.getInput('templates');
+        core.notice(`templatesDir: ${templatesDir}`);
 
         // Grab the prefix from the input
         const prefix = core.getInput('prefix');
+        core.notice(`prefix: ${prefix}`);
 
         // GitHub should validate this because it's required, but just to be safe!
         if (!templatesDir) {
@@ -31,7 +33,7 @@ async function run() {
     }
 }
 
-function parseFiles(client, templatesDir, prefix = "") {
+function parseFiles(client, templatesDir, prefix) {
     // Read each file in the directory
     fs.readdirSync(templatesDir).forEach((name) => {
         const path = `${templatesDir}/${name}`;
@@ -44,15 +46,17 @@ function parseFiles(client, templatesDir, prefix = "") {
 
         // Parse the JSON from the file
         const file = JSON.parse(fs.readFileSync(path));
+        core.notice(`file: ${JSON.stringify(file)}`);
 
         const templateName = `${prefix}_${file.Template.TemplateName}`;
+        core.notice(`templateName: ${templateName}`);
 
         // First, figure out if we have a template
         client.send(new GetTemplateCommand({TemplateName: templateName})).then(() => {
             // We have a template! Update it
 
             client.send(new UpdateTemplateCommand({
-                Template: file.Template
+                Template: { ...file.Template, TemplateName: templateName }
             })).then(() => {
                 core.notice(`Updated template: ${templateName} (${name})`);
             }).catch((error) => {
@@ -60,7 +64,7 @@ function parseFiles(client, templatesDir, prefix = "") {
             });
         }).catch(() => {
             client.send(new CreateTemplateCommand({
-                Template: file.Template
+                Template: { ...file.Template, TemplateName: templateName }
             })).then(() => {
                 core.notice(`Created template: ${templateName} (${name})`);
             }).catch((error) => {
