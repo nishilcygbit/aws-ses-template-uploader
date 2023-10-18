@@ -20,3 +20,7 @@ with:
   template: 'templates'
   prefix: 'dev'
 ```
+
+# Inspiration
+
+This actions plugin is extension of [action-aws-ses-template-uploader](https://github.com/managemy-lease/action-aws-ses-template-uploader). It only adds an extra attribute 
