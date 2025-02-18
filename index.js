@@ -41,19 +41,12 @@ function parseFiles(client, templatesDir, prefix) {
     filesChunks.push(allFiles.slice(i, i + 20));
   }
   for (const fileChunk of filesChunks) {
-    fileChunk.forEach((name, index) => {
+    fileChunk.forEach(async (name, index) => {
       const path = `${templatesDir}/${name}`;
 
       // If it's a directory, read the file within there
       if (fs.lstatSync(path).isDirectory()) {
         readFiles(path);
-        return;
-      }
-      if (index % 20 === 0) {
-        setTimeout(() => {
-          console.log("Delaying for 5 seconds");
-          readFiles(path);
-        }, 5000);
         return;
       }
 
@@ -63,12 +56,12 @@ function parseFiles(client, templatesDir, prefix) {
       const templateName = `${prefix}${file.Template.TemplateName}`;
 
       // First, figure out if we have a template
-      client
+      await client
         .send(new GetTemplateCommand({ TemplateName: templateName }))
-        .then(() => {
+        .then(async () => {
           // We have a template! Update it
 
-          client
+          await client
             .send(
               new UpdateTemplateCommand({
                 Template: { ...file.Template, TemplateName: templateName },
@@ -81,8 +74,8 @@ function parseFiles(client, templatesDir, prefix) {
               core.setFailed(error.message);
             });
         })
-        .catch(() => {
-          client
+        .catch(async () => {
+          await client
             .send(
               new CreateTemplateCommand({
                 Template: { ...file.Template, TemplateName: templateName },
