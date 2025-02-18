@@ -25,13 +25,13 @@ async function run() {
     const client = new SESClient();
 
     // Parse each file in the directory
-    parseFiles(client, templatesDir, prefix);
+    await parseFiles(client, templatesDir, prefix);
   } catch (error) {
     core.setFailed(error.message);
   }
 }
 
-function parseFiles(client, templatesDir, prefix) {
+async function parseFiles(client, templatesDir, prefix) {
   // Read each file in the directory
   // Make this work such that after every 20th file there is a delay of 5 seconds and then resumes reading the files
   const allFiles = fs.readdirSync(templatesDir);
@@ -89,9 +89,7 @@ function parseFiles(client, templatesDir, prefix) {
             });
         });
     });
-    setTimeout(() => {
-      console.log("Delaying for 5 seconds");
-    }, 5000);
+    await new Promise((r) => setTimeout(r, 2000));
   }
 }
 
