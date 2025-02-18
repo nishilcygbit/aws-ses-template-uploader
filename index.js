@@ -35,14 +35,18 @@ async function parseFiles(client, templatesDir, prefix) {
   // Read each file in the directory
   // Make this work such that after every 20th file there is a delay of 5 seconds and then resumes reading the files
   const allFiles = fs.readdirSync(templatesDir);
+  core.notice(`Found ${allFiles.length} files in the directory`);
   // Next split the files into chunks of 20
   const filesChunks = [];
   for (let i = 0; i < allFiles.length; i += 20) {
     filesChunks.push(allFiles.slice(i, i + 20));
   }
+  core.notice(`Split the files into ${filesChunks.length} chunks`);
   for (const fileChunk of filesChunks) {
+    core.notice(`Processing the next batch of files - ${fileChunk.length}`);
     fileChunk.forEach(async (name, index) => {
       const path = `${templatesDir}/${name}`;
+      core.notice(`Processing file - ${path}`);
 
       // If it's a directory, read the file within there
       if (fs.lstatSync(path).isDirectory()) {
@@ -88,8 +92,12 @@ async function parseFiles(client, templatesDir, prefix) {
               core.setFailed(error.message);
             });
         });
+      core.notice(`Finished Processing file - ${path}`);
     });
-    await new Promise((r) => setTimeout(r, 2000));
+    core.notice(
+      "Waiting for 5 seconds before processing the next batch of files"
+    );
+    await new Promise((r) => setTimeout(r, 5000));
   }
 }
 
