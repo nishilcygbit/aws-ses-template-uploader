@@ -69630,7 +69630,7 @@ ${pendingInterceptorsFormatter.format(pending)}
       core.notice(`Split the files into ${filesChunks.length} chunks`);
       for (const fileChunk of filesChunks) {
         core.notice(`Processing the next batch of files - ${fileChunk.length}`);
-        fileChunk.forEach(async (name, index) => {
+        await fileChunk.forEach(async (name, index) => {
           const path = `${templatesDir}/${name}`;
           core.notice(`Processing file - ${path}`);
 
