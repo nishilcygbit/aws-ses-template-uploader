@@ -34,59 +34,72 @@ async function run() {
 function parseFiles(client, templatesDir, prefix) {
   // Read each file in the directory
   // Make this work such that after every 20th file there is a delay of 5 seconds and then resumes reading the files
-  fs.readdirSync(templatesDir).forEach((name, index) => {
-    const path = `${templatesDir}/${name}`;
+  const allFiles = fs.readdirSync(templatesDir);
+  // Next split the files into chunks of 20
+  const filesChunks = [];
+  for (let i = 0; i < allFiles.length; i += 20) {
+    filesChunks.push(allFiles.slice(i, i + 20));
+  }
+  for (const fileChunk of filesChunks) {
+    fileChunk.forEach((name, index) => {
+      const path = `${templatesDir}/${name}`;
 
-    // If it's a directory, read the file within there
-    if (fs.lstatSync(path).isDirectory()) {
-      readFiles(path);
-      return;
-    }
-    if (index % 20 === 0) {
-      setTimeout(() => {
+      // If it's a directory, read the file within there
+      if (fs.lstatSync(path).isDirectory()) {
         readFiles(path);
-      }, 5000);
-    }
+        return;
+      }
+      if (index % 20 === 0) {
+        setTimeout(() => {
+          console.log("Delaying for 5 seconds");
+          readFiles(path);
+        }, 5000);
+        return;
+      }
 
-    // Parse the JSON from the file
-    const file = JSON.parse(fs.readFileSync(path));
+      // Parse the JSON from the file
+      const file = JSON.parse(fs.readFileSync(path));
 
-    const templateName = `${prefix}${file.Template.TemplateName}`;
+      const templateName = `${prefix}${file.Template.TemplateName}`;
 
-    // First, figure out if we have a template
-    client
-      .send(new GetTemplateCommand({ TemplateName: templateName }))
-      .then(() => {
-        // We have a template! Update it
+      // First, figure out if we have a template
+      client
+        .send(new GetTemplateCommand({ TemplateName: templateName }))
+        .then(() => {
+          // We have a template! Update it
 
-        client
-          .send(
-            new UpdateTemplateCommand({
-              Template: { ...file.Template, TemplateName: templateName },
+          client
+            .send(
+              new UpdateTemplateCommand({
+                Template: { ...file.Template, TemplateName: templateName },
+              })
+            )
+            .then(() => {
+              core.notice(`Updated template: ${templateName} (${name})`);
             })
-          )
-          .then(() => {
-            core.notice(`Updated template: ${templateName} (${name})`);
-          })
-          .catch((error) => {
-            core.setFailed(error.message);
-          });
-      })
-      .catch(() => {
-        client
-          .send(
-            new CreateTemplateCommand({
-              Template: { ...file.Template, TemplateName: templateName },
+            .catch((error) => {
+              core.setFailed(error.message);
+            });
+        })
+        .catch(() => {
+          client
+            .send(
+              new CreateTemplateCommand({
+                Template: { ...file.Template, TemplateName: templateName },
+              })
+            )
+            .then(() => {
+              core.notice(`Created template: ${templateName} (${name})`);
             })
-          )
-          .then(() => {
-            core.notice(`Created template: ${templateName} (${name})`);
-          })
-          .catch((error) => {
-            core.setFailed(error.message);
-          });
-      });
-  });
+            .catch((error) => {
+              core.setFailed(error.message);
+            });
+        });
+    });
+    setTimeout(() => {
+      console.log("Delaying for 5 seconds");
+    }, 5000);
+  }
 }
 
 run();
