@@ -69673,12 +69673,10 @@ ${pendingInterceptorsFormatter.format(pending)}
             }
           }
           core.notice(`Finished Processing file - ${path}`);
-        }
 
-        core.notice(
-          "Waiting for 5 seconds before processing the next batch of files"
-        );
-        await new Promise((r) => setTimeout(r, 5000));
+          core.notice("Waiting for 1 second before processing the next file");
+          await new Promise((r) => setTimeout(r, 1000));
+        }
       }
     }
 
